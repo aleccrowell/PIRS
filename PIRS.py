@@ -94,7 +94,6 @@ class ranker:
             ('ln(PIRS)', '@error'),
         ]
         output_file(self.tgene+".html", title=self.tgene)
-        show(p)
 
     def output(self,fname1,fname2):
         self.errors.to_csv(fname1)
