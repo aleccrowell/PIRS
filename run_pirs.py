@@ -41,6 +41,8 @@ def main(argv):
     to_rank.get_exp_diff()
     print('Plotting')
     to_rank.plot_diff_v_error()
+    print('exporting data')
+    to_rank.output('errors.csv','TPMs.csv')
 
 if __name__ == '__main__':
     main(sys.argv[1:])

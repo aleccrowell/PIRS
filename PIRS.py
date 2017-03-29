@@ -86,7 +86,7 @@ class ranker:
             error=temp['errors'].values,
             transcript=temp.index.values
         ))
-        p = figure(title="PIRS Results "+self.tgene,tools="hover",x_axis_label="Expressin Difference (ln(count))",y_axis_label="ln(Prediction Interval Ranking Score)")
+        p = figure(title="PIRS Results "+self.tgene,tools="hover",x_axis_label="Expressin Difference (ln(TPM))",y_axis_label="ln(Prediction Interval Ranking Score)")
         p.circle('exp_diff', 'error', size=6, color="navy", alpha=0.5, source=source)
         p.select_one(HoverTool).tooltips = [
             ('transcript', '@transcript'),
@@ -96,5 +96,6 @@ class ranker:
         output_file(self.tgene+".html", title=self.tgene)
         show(p)
 
-    def output(self,fname):
-        self.errors.to_csv(fname,sep='\t')
+    def output(self,fname1,fname2):
+        self.errors.to_csv(fname1)
+        self.abs.to_csv(fname2)
