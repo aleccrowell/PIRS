@@ -5,6 +5,7 @@ from scipy import stats
 from sklearn import linear_model
 import math
 import scipy
+from tqdm import tqdm
 
 class ranker:
     """
@@ -30,7 +31,7 @@ class ranker:
 
 
     """
-    def __init__(self, filename, anova=False):
+    def __init__(self, filename, anova=True):
         """
         Imports data and initializes a ranker object.
 
@@ -39,6 +40,7 @@ class ranker:
 
         """
         self.data = pd.read_csv(filename, sep='\t', header=0, index_col=0)
+        self.data = self.data[(self.data.T != 0).any()]
         self.anova = anova
 
     def get_tpoints(self):
@@ -104,17 +106,17 @@ class ranker:
         """
         dof = len(np.unique(self.tpoints))
         es = {}
-        for index in range(len(data)):
+        for index in tqdm(range(len(self.data))):
             regr = linear_model.LinearRegression()
-            _ = regr.fit(np.array(tpoints)[:, np.newaxis], np.array(data.iloc[index]))
-            rsq = np.sum((regr.predict(np.array(tpoints)[:, np.newaxis]) - np.array(data.iloc[index])) ** 2)
+            _ = regr.fit(np.array(self.tpoints)[:, np.newaxis], np.array(self.data.iloc[index]))
+            rsq = np.sum((regr.predict(np.array(self.tpoints)[:, np.newaxis]) - np.array(self.data.iloc[index])) ** 2)
             regr_error = math.sqrt(rsq/(dof-2))
-            xsq = np.sum((np.array(tpoints) - np.mean(np.array(tpoints))) ** 2)
+            xsq = np.sum((np.array(self.tpoints) - np.mean(np.array(self.tpoints))) ** 2)
             pred = []
-            for x in np.array(tpoints):
-                pred.append(regr.predict([[x]]) + scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(tpoints))**2)/xsq)))
-                pred.append(regr.predict([[x]]) - scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(tpoints))**2)/xsq)))
-            error = np.sum([(i - np.mean(np.array(data.iloc[index]))) ** 2 for i in pred])/(np.mean(np.array(data.iloc[index])**2))
+            for x in np.array(self.tpoints):
+                pred.append(regr.predict([[x]]) + scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(self.tpoints))**2)/xsq)))
+                pred.append(regr.predict([[x]]) - scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(self.tpoints))**2)/xsq)))
+            error = np.sum([(i - np.mean(np.array(self.data.iloc[index]))) ** 2 for i in pred])/(np.mean(np.array(self.data.iloc[index]))**2)
             es[index] = np.mean(error)
         self.errors = pd.DataFrame.from_dict(es, orient='index')
         self.errors.columns = ['errors']
@@ -134,10 +136,10 @@ class ranker:
             Input data sorted by PIRS.
 
         """
-        get_tpoints()
+        self.get_tpoints()
         if self.anova:
-            remove_anova()
-        calculate_scores()
-        sorted_data = self.data.iloc[errors.index.values]
+            self.remove_anova()
+        self.calculate_scores()
+        sorted_data = self.data.iloc[self.errors.index.values]
         return sorted_data
 
