@@ -85,7 +85,7 @@ class ranker:
                 to_remove.append(index)
         self.data = self.data[~self.data.index.isin(to_remove)]
 
-    def calculate_scores(self, dof=len(np.unique(self.tpoints)), alpha=0.05):
+    def calculate_scores(self, alpha=0.05):
         """
         Calculates prediction intervals and generates ranking scores.
 
@@ -102,6 +102,7 @@ class ranker:
             Prediction interval ranking scores for each expression profile.
 
         """
+        dof = len(np.unique(self.tpoints))
         es = {}
         for index in range(len(data)):
             regr = linear_model.LinearRegression()
