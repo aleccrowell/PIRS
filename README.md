@@ -58,7 +58,7 @@ be expected to have wide prediction intervals which are far from the mean across
 
 ![ImageRelative](data/illustration.png "illustration")
 
-After calculating the prediction intervals pirs simply considers the sum of squared errors between the upper and lower bounds of the interval and the mean expression across all the observed time points.  This value is then scaled 
+After calculating the prediction intervals PIRS simply considers the sum of squared errors between the upper and lower bounds of the interval and the mean expression across all the observed time points.  This value is then scaled 
 relative to the mean expression producing the final score. 
 
 ----
