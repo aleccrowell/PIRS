@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from itertools import *
-from tqdm import tqdm
 from scipy import stats
 from sklearn import linear_model
 import math
@@ -77,7 +76,7 @@ class ranker:
 
         """
         to_remove = []
-        for index, row in tqdm(self.data.iterrows()):
+        for index, row in self.data.iterrows():
             vals = []
             for i in list(set(self.tpoints)):
                 vals.append([row.values[j] for j in range(len(row)) if self.tpoints[j] == i])
@@ -104,17 +103,17 @@ class ranker:
 
         """
         es = {}
-        for index, row in tqdm(self.data.iterrows()):
+        for index in range(len(data)):
             regr = linear_model.LinearRegression()
-            regr.fit(np.array(self.tpoints)[:, np.newaxis], np.array(row))
-            rsq = np.sum((regr.predict(np.array(self.tpoints)[:, np.newaxis]) - np.array(row)) ** 2)
+            _ = regr.fit(np.array(tpoints)[:, np.newaxis], np.array(data.iloc[index]))
+            rsq = np.sum((regr.predict(np.array(tpoints)[:, np.newaxis]) - np.array(data.iloc[index])) ** 2)
             regr_error = math.sqrt(rsq/(dof-2))
-            xsq = np.sum((np.array(self.tpoints) - np.mean(np.array(self.tpoints))) ** 2)
+            xsq = np.sum((np.array(tpoints) - np.mean(np.array(tpoints))) ** 2)
             pred = []
-            for x in np.array(self.tpoints):
-                pred.append(regr.predict(x) + scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(self.tpoints))**2)/xsq)))
-                pred.append(regr.predict(x) - scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(self.tpoints))**2)/xsq)))
-            error = np.sum([(i - np.mean(np.array(row))) ** 2 for i in pred])/(np.mean(np.array(row)**2)
+            for x in np.array(tpoints):
+                pred.append(regr.predict([[x]]) + scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(tpoints))**2)/xsq)))
+                pred.append(regr.predict([[x]]) - scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(tpoints))**2)/xsq)))
+            error = np.sum([(i - np.mean(np.array(data.iloc[index]))) ** 2 for i in pred])/(np.mean(np.array(data.iloc[index])**2))
             es[index] = np.mean(error)
         self.errors = pd.DataFrame.from_dict(es, orient='index')
         self.errors.columns = ['errors']
