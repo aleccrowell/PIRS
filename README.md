@@ -65,7 +65,7 @@ relative to the mean expression producing the final score.
 TO DO
 ----
 
-* Implement simulations for non-circadian user testing.
+* Implement simulations for user testing.
 
 * Add api reference on readthedocs.
 
