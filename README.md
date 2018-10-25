@@ -67,7 +67,7 @@ TO DO
 
 * Implement simulations for user testing.
 
-* Add api reference on readthedocs.
+* Add API reference on readthedocs.
 
 ----
 Built With
