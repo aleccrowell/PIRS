@@ -36,9 +36,9 @@ PIRS expects input files to be formatted as tab seperated.  The first column sho
 the first number indicating the timepoint and the second the replicate.  Single digit timepoints should include the leading zero for 
 formatting. Missing values should be indicated by the string 'NULL'.  Example data file:
 
-| Peptide | Protein | 00_1 | 00_2 | 00_3 | 02_1 | 02_2 | 02_3 |
-|---|---|---|---|---|---|---|---|
-| Peptide_ID | Protein_ID | data | data | data | data | data | data |
+| # | 00_1 | 00_2 | 00_3 | 02_1 | 02_2 | 02_3 |
+|---|---|---|---|---|---|---|
+| ID | data | data | data | data | data | data |
 
 ------------
 Installation
