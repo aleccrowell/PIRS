@@ -119,16 +119,22 @@ class ranker:
             error = np.sum([(i - np.mean(np.array(self.data.iloc[index]))) ** 2 for i in pred])/(np.mean(np.array(self.data.iloc[index]))**2)
             es[index] = np.mean(error)
         self.errors = pd.DataFrame.from_dict(es, orient='index')
-        self.errors.columns = ['errors']
-        self.errors.sort_values('errors', inplace=True)
+        self.errors.columns = ['score']
+        self.errors.index = self.data.index
+        self.errors.sort_values('score', inplace=True)
         return self.errors
 
-    def pirs_sort(self):
+    def pirs_sort(self, outname=False):
         """
         Runs analysis pipeline and outputs data sorted by prediction interval ranking score.
 
 
         Takes input data, calculates timepoints, runs anova filtering if applicable, calculates PIRS and outputs data.
+
+        Parameters
+        ----------
+        outname : str
+            Path to desired output file.
 
         Returns
         -------
@@ -140,6 +146,81 @@ class ranker:
         if self.anova:
             self.remove_anova()
         self.calculate_scores()
-        sorted_data = self.data.iloc[self.errors.index.values]
+        sorted_data = self.data.loc[self.errors.index.values]
+        if outname:
+            self.errors.to_csv(outname, sep='\t')
+        return sorted_data
+
+class rsd_ranker:
+    """
+    Ranks and sorts expression profiles from most to least constitutive using old algorithm for benchmarking.
+
+
+    This class takes a dataset of time series expression profiles.  It then calculates Relative Standard Deviations (RSD) and ranks on this value.
+
+
+    Parameters
+    ----------
+    filename : str
+        Path to the input dataset.
+
+    Attributes
+    ----------
+    data : dataframe
+        This is where the input data is stored.
+
+
+    """
+    def __init__(self, filename):
+        """
+        Imports data and initializes a ranker object.
+
+
+        Takes a file  which has one index column and a number of timepoint labeled data columns.
+
+        """
+        self.data = pd.read_csv(filename, sep='\t', header=0, index_col=0)
+        self.data = self.data[(self.data.T != 0).any()]
+
+    def calculate_scores(self):
+        """
+        Calculates Relative Standard Deviations.
+
+        Calculates a ranking score.
+
+        Attributes
+        ----------
+        rsd : series
+            Relative Standard Deviation for each expression profile.
+
+        """
+        rsd = (1 + (1/(4*len(self.data)))) * np.std(self.data.values, axis=1) / np.abs(np.mean(self.data.values, axis=1))
+        self.rsd = pd.DataFrame(rsd, index=self.data.index) 
+        self.rsd.columns = ['score']
+        self.rsd.sort_values('score', inplace=True)
+        return self.rsd
+
+    def rsd_sort(self, outname=False):
+        """
+        Runs analysis pipeline and outputs data sorted by relative standard deviation.
+
+
+        Takes input data, calculates RSD, sorts and outputs data.
+
+        Parameters
+        ----------
+        outname : str
+            Path to desired output file.
+
+        Returns
+        -------
+        sorted_data : dataframe
+            Input data sorted by RSD.
+
+        """
+        self.calculate_scores()
+        sorted_data = self.data.loc[self.rsd.index.values]
+        if outname:
+            self.rsd.to_csv(outname, sep='\t')
         return sorted_data
 
