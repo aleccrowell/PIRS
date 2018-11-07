@@ -34,7 +34,7 @@ sorted_data = data.pirs_sort()
 ### A Note on Data Formatting
 PIRS expects input files to be formatted as tab seperated.  The first column should indicate the transcript or protein identifier.  The header should start with '#' and the rest of the header should be of the form 02_1 for data with
 the first number indicating the timepoint and the second the replicate.  Single digit timepoints should include the leading zero for 
-formatting. Missing values should bbe indicated by the string 'NULL'.  Example data file:
+formatting. Missing values should be indicated by the string 'NULL'.  Example data file:
 
 | Peptide | Protein | 00_1 | 00_2 | 00_3 | 02_1 | 02_2 | 02_3 |
 |---|---|---|---|---|---|---|---|
