@@ -27,7 +27,9 @@ class simulate:
 
     tpoint_space : int
         
-    pconst : float
+    pcirc : float
+
+    plin : float
 
     phase_prop : float
 
@@ -49,7 +51,7 @@ class simulate:
 
     """
 
-    def __init__(self, tpoints=24, nrows=1000, nreps=3, tpoint_space=2, pconst=.2, phase_prop=.5, phase_noise=.25, amp_noise=.75,  rseed=4574):
+    def __init__(self, tpoints=24, nrows=1000, nreps=3, tpoint_space=2, pcirc=.4, plin=.4, phase_prop=.5, phase_noise=.05, amp_noise=.5,  rseed=4574):
         """
         Simulates circadian data and saves as a properly formatted example .csv file.
 
@@ -62,7 +64,8 @@ class simulate:
         self.nreps = int(nreps)
         self.nrows = int(nrows)
         self.tpoint_space = int(tpoint_space)
-        self.pconst = float(pconst)
+        self.pcirc = float(pcirc)
+        self.plin = float(plin)
         self.phase_prop = float(phase_prop)
         self.phase_noise = float(phase_noise)
         self.amp_noise = float(amp_noise)
@@ -75,13 +78,13 @@ class simulate:
                     ("{0:0=2d}".format(self.tpoint_space*i+self.tpoint_space))+'_'+str(j+1))
 
         #randomly determine which rows are circadian
-        self.const = np.random.binomial(1, self.pconst, self.nrows)
+        self.const = np.random.binomial(1, (1-self.pcirc-self.plin), self.nrows)
         #generate a base waveform
         base = np.arange(0, (4*np.pi), (4*np.pi/self.tpoints))
         #simulate data
         self.sim = []
         phases = []
-        trend_types = np.random.binomial(1, 0.5, len(np.where(~self.const)[0]))
+        trend_types = np.random.binomial(1, self.pcirc, len(np.where(~self.const)[0]))
         for ind, val in enumerate(self.const):
             if val == 0:
                 if trend_types[ind] == 1:

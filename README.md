@@ -73,8 +73,16 @@ from PIRS import simulations, rank
 simulation = simulations.simulate()
 simulation.write_output(path_to_data)
 
-data = rank.ranker(path_to_data)
-sorted_data = data.pirs_sort(path_to_output)
+data = rank.ranker("simulated_data_with_noise.txt")
+sorted_data = data.pirs_sort("pirs_scores.txt")
+
+old_data = rank.rsd_ranker("simulated_data_with_noise.txt")
+old_sorted_data = old_data.rsd_sort("rsd_scores.txt")
+
+analysis = simulations.analyze('simulated_data_true_classes.txt')
+analysis.add_data('pirs_scores.txt','PIRS')
+analysis.add_data('rsd_scores.txt','SD/RSD')
+analysis.generate_pr_curve()
 ```
 
 Which produces a figure like this:
