@@ -9,7 +9,7 @@ Motivation
 ----------
 
 The issue of identifying increasing, decreasing or even cyclical patterns in time series data is well studied.  Little effort has been devoted to screening for stable expression.  Identifying constitutive expression is especially 
-important when selecting reference genes which are later assumed to be stably expressed for purposes such as qPCR.  In the past many 'constitutively expresse' reference genes have later been identified to have circadian or other 
+important when selecting reference genes which are later assumed to be stably expressed for purposes such as qPCR.  In the past many 'constitutively expressed' reference genes have later been identified to have circadian or other 
 dynamic expression patterns.  PIRS provides for the systematic screening of expression profiles from high throughput time series to identify those which are truly constitutively expressed.
 
 --------
