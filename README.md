@@ -96,7 +96,7 @@ PIRS clearly outperforms a SD based metric, however it is useful to run several 
 from PIRS import simulations, rank
 
 for i in range(20):
-    simulation = simulations.simulate(amp_noise=.35,rseed=i)
+    simulation = simulations.simulate(rseed=i)
     simulation.write_output("sim_"+str(i)+".txt")
     data = rank.ranker("sim_"+str(i)+".txt")
     sorted_data = data.pirs_sort("pirs_"+str(i)+".txt")
