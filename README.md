@@ -71,15 +71,16 @@ Using the included simulation utilities we can compare the preformance of PIRS t
 from PIRS import simulations, rank
 
 simulation = simulations.simulate()
-simulation.write_output(path_to_data)
+simulation.write_output()
 
-data = rank.ranker("simulated_data_with_noise.txt")
+data = rank.ranker('simulated_data_with_noise.txt')
 sorted_data = data.pirs_sort("pirs_scores.txt")
 
-old_data = rank.rsd_ranker("simulated_data_with_noise.txt")
-old_sorted_data = old_data.rsd_sort("rsd_scores.txt")
+old_data = rank.rsd_ranker('simulated_data_with_noise.txt')
+old_sorted_data = old_data.rsd_sort('rsd_scores.txt')
 
-analysis = simulations.analyze('simulated_data_true_classes.txt')
+analysis = simulations.analyze()
+analysis.add_classes('simulated_data_with_noise_true_classes.txt')
 analysis.add_data('pirs_scores.txt','PIRS')
 analysis.add_data('rsd_scores.txt','SD/RSD')
 analysis.generate_pr_curve()
@@ -87,9 +88,31 @@ analysis.generate_pr_curve()
 
 Which produces a figure like this:
 
+![ImageRelative](data/PR.png "PR")
 
 PIRS clearly outperforms a SD based metric, however it is useful to run several simulations to determine if this improved performance is consistent:
 
+```python
+from PIRS import simulations, rank
+
+for i in range(20):
+    simulation = simulations.simulate(amp_noise=.35,rseed=i)
+    simulation.write_output("sim_"+str(i)+".txt")
+    data = rank.ranker("sim_"+str(i)+".txt")
+    sorted_data = data.pirs_sort("pirs_"+str(i)+".txt")
+    old_data = rank.rsd_ranker("sim_"+str(i)+".txt")
+    old_sorted_data = old_data.rsd_sort("rsd_"+str(i)+".txt")
+
+
+analysis = simulations.analyze()
+for i in range(20):
+    analysis.add_classes("sim_"+str(i)+"_true_classes.txt",rep=i)
+    analysis.add_data("pirs_"+str(i)+".txt",'PIRS',rep=i)
+    analysis.add_data("rsd_"+str(i)+".txt",'SD/RSD',rep=i)
+
+
+analysis.generate_pr_curve()
+```
 
 
 ### Further Exploration
