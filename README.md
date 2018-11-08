@@ -147,7 +147,8 @@ Built With
 * pandas
 * scipy 
 * sklearn 
-* tqdm 
+* tqdm
+* seaborn
 
 -------
 License
