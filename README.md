@@ -113,7 +113,9 @@ for i in range(20):
 
 analysis.generate_pr_curve()
 ```
+Which produces something like this:
 
+![ImageRelative](data/multi_PR.png "multi_PR")
 
 ### Further Exploration
 
