@@ -6,6 +6,7 @@ from sklearn.preprocessing import scale
 from sklearn.metrics import precision_recall_curve, average_precision_score
 import matplotlib.pyplot as plt
 import random
+import seaborn as sns
 
 ##Simulating single expression level, would have to equalize distribution of mean expressins between classes if simulating multiple expression levels
 
@@ -51,11 +52,11 @@ class simulate:
 
     """
 
-    def __init__(self, tpoints=24, nrows=1000, nreps=3, tpoint_space=2, pcirc=.4, plin=.4, phase_prop=.5, phase_noise=.05, amp_noise=.5,  rseed=4574):
+    def __init__(self, tpoints=24, nrows=1000, nreps=3, tpoint_space=2, pcirc=.4, plin=.4, phase_prop=.5, phase_noise=.05, amp_noise=.35,  rseed=None):
         """
-        Simulates circadian data and saves as a properly formatted example .csv file.
+        Simulates circadian, linear and constitutive data and saves as a properly formatted example .csv file.
 
-        Takes a file from one of two data types protein ('p') which has two index columns or rna ('r') which has only one.  Opens a pickled file matching pooled controls to corresponding samples if data_type = 'p' and opens a picked file matching samples to blocks if designtype = 'b'.
+        
 
         """
 
@@ -122,41 +123,56 @@ class simulate:
         self.simndf.index.names = ['#']
         self.simndf.to_csv(out_name, sep='\t')
 
-        pd.DataFrame(self.const, columns=['Const'], index=self.simndf.index).to_csv(out_name+'_true_classes.txt', sep='\t')
+        pd.DataFrame(self.const, columns=['Const'], index=self.simndf.index).to_csv(out_name[:-4]+'_true_classes.txt', sep='\t')
 
 
 class analyze:
-    def __init__(self, filename_classes):
-        self.true_classes = pd.read_csv(filename_classes, sep='\t')
-        self.tags = {}
-        self.merged = []
-        self.i = 0
+    def __init__(self):
+        self.true_classes = pd.DataFrame()
+        self.merged = pd.DataFrame()
 
-    def add_data(self, filename_pirs, tag):
-        self.tags[tag] = self.i
-        pirs = pd.read_csv(filename_pirs, sep='\t')
-        self.merged.append(pd.merge(self.true_classes[['#', 'Const']], pirs[['#', 'score']], left_on='#', right_on='#', how='left'))
-        self.merged[-1]['score'].fillna(self.merged[-1]['score'].max(), inplace=True)
-        self.i += 1
+    def add_classes(self, filename_classes, rep=0):
+        tc = pd.read_csv(filename_classes, index_col=0, sep='\t')
+        tc['rep'] = rep
+        self.true_classes = pd.concat([self.true_classes,tc])
 
-    def generate_roc_curve(self):
-        for j in self.tags.keys():
-            precision, recall, _ = precision_recall_curve(self.merged[self.tags[j]]['Const'].values, 1/self.merged[self.tags[j]]['score'].values, pos_label=1)
-            plt.plot(recall, precision, label=j)
-        plt.plot([0, 1], [np.mean(self.true_classes['Const']), np.mean(
-            self.true_classes['Const'])], color='r', linestyle=':')
+    def add_data(self, filename_pirs, tag, rep=0):
+        ranks = pd.read_csv(filename_pirs, index_col=0, sep='\t')
+        ranks['method'] =  tag
+        ranks['rep'] = rep
+        ranks['score'].fillna(ranks['score'].max(), inplace=True)
+        if self.merged.empty:
+            self.merged = ranks
+        else:
+            self.merged = pd.concat([self.merged, ranks])
+
+    def generate_pr_curve(self):
+        self.curves = pd.DataFrame(columns=['precision','recall','method'])
+        for rep, res in self.merged.groupby('rep'):
+            for name, group in res.groupby('method'):
+                pr = pd.merge(self.true_classes[self.true_classes['rep']==rep], group, right_index=True, left_index=True, how='inner')
+                precision, recall, _ = precision_recall_curve(pr['Const'].values, 1/pr['score'].values, pos_label=1)
+                temp = pd.DataFrame()
+                temp['precision'] = precision
+                temp['recall'] = recall
+                temp['method'] = name
+                temp['rep'] = rep
+                self.curves = pd.concat([self.curves,temp])
+        sns.lineplot(x='recall', y='precision', hue='method', units='rep', estimator=None, data=self.curves)
+        plt.plot([0, 1], [np.mean(self.true_classes['Const']), np.mean(self.true_classes['Const'])], color='r', linestyle=':')
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.title('Precision Recall Comparison')
-        plt.legend(loc="lower right")
+        plt.legend(loc="upper right")
         plt.savefig('PR.pdf')
         plt.close()
+
 
     def calculate_auc(self):
         out = {}
         for j in self.tags.keys():
-            fpr, tpr, thresholds = roc_curve(self.merged[self.tags[j]]['Const'].values, (self.merged[self.tags[j]]['score'].values), pos_label=1)
+            fpr, tpr, thresholds = pr_curve(self.merged[self.tags[j]]['Const'].values, (self.merged[self.tags[j]]['score'].values), pos_label=1)
             out[j] = auc(fpr, tpr)
-        self.roc_auc = out
+        self.pr_auc = out
