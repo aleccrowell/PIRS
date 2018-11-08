@@ -1,8 +1,8 @@
 PIRS: Prediction Interval Ranking Score
 =======================================
 
-PIRS provides a means for identifying constitutive expression from time series data.  The software was designed for transcriptomic or proteomic data, but can be applied to any quantitative time series data. There is only one class 
-rank, which performs the ranking.
+PIRS provides a means for identifying constitutive expression from time series data.  The software was designed for transcriptomic or proteomic data, but can be applied to any quantitative time series data. There are two classes 
+rank, which performs the ranking and simulations which provides utilities for simulating data and benchmarking.
 
 ----------
 Motivation
