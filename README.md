@@ -31,17 +31,8 @@ simulation = simulations.simulate()
 simulation.write_output(path_to_data)
 
 data = rank.ranker(path_to_data)
-sorted_data = data.pirs_sort(pat_to_outputh)
+sorted_data = data.pirs_sort(path_to_output)
 ```
-
-### A Note on Data Formatting
-PIRS expects input files to be formatted as tab seperated.  The first column should indicate the transcript or protein identifier.  The header should start with '#' and the rest of the header should be of the form 02_1 for data with
-the first number indicating the timepoint and the second the replicate.  Single digit timepoints should include the leading zero for 
-formatting. Missing values should be indicated by the string 'NULL'.  Example data file:
-
-| # | 00_1 | 00_2 | 00_3 | 02_1 | 02_2 | 02_3 |
-|---|---|---|---|---|---|---|
-| ID | data | data | data | data | data | data |
 
 ------------
 Installation
@@ -64,11 +55,56 @@ be expected to have wide prediction intervals which are far from the mean across
 After calculating the prediction intervals PIRS simply considers the sum of squared errors between the upper and lower bounds of the interval and the mean expression across all the observed time points.  This value is then scaled 
 relative to the mean expression producing the final score. 
 
+### A Note on Data Formatting
+PIRS expects input files to be formatted as tab seperated.  The first column should indicate the transcript or protein identifier.  The header should start with '#' and the rest of the header should be of the form 02_1 for data with
+the first number indicating the timepoint and the second the replicate.  Single digit timepoints should include the leading zero for 
+formatting. Missing values should be indicated by the string 'NULL'.  Example data file:
+
+| # | 00_1 | 00_2 | 00_3 | 02_1 | 02_2 | 02_3 |
+|---|---|---|---|---|---|---|
+| ID | data | data | data | data | data | data |
+
+###Performance
+Using the included simulation utilities we can compare the preformance of PIRS to more frequently used standard deviation (SD) based metrics.  To generate a set of simulations, rank by both PIRS and SD and compare precision recall curves, we can run:
+
+```python
+from PIRS import simulations, rank
+
+simulation = simulations.simulate()
+simulation.write_output(path_to_data)
+
+data = rank.ranker(path_to_data)
+sorted_data = data.pirs_sort(path_to_output)
+```
+
+Which produces a figure like this:
+
+
+PIRS clearly outperforms a SD based metric, however it is useful to run several simulations to determine if this improved performance is consistent:
+
+
+
+### Further Exploration
+
+If you'd like to explore the impact of varying simulated data parameters on the performance of PIRS, all you have to do is supply additional parameters during the simulation step.
+
+* points = NUMBER OF TIMEPOINTS
+* nrows = NUMBER OF ROWS OF DATA
+* nreps = NUMBER OF REPLICATES
+* tpoint_space = AMOUNT OF TIME BETWEEN TIMEPOINTS
+* pcirc = PROBABILITY OF A ROW BEING CIRCADIAN
+* plin = PROBABILITY OF A ROW HAVING A LINEAR TREND
+* phase_prop = PROPORTION OF CIRCADIAN ROWS IN EACH PHASE GROUP (two phases of expression)
+* phase_noise = AMOUNT OF VARIABILITY IN PHASE WITHIN PHASE GROUPS OF CIRCADIAN ROWS
+* amp_noise = AMOUNT OF BIOLOGICAL VARIABILITY IN EXPRESSION
+
+```
+simulation = simulations.simulate(tpoints, nrows, nreps, tpoint_space, pcirc, plin, phase_prop, phase_noise, amp_noise)
+```
+
 ----
 TO DO
 ----
-
-* Implement simulations for user testing.
 
 * Add API reference on readthedocs.
 
