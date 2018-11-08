@@ -64,7 +64,7 @@ formatting. Missing values should be indicated by the string 'NULL'.  Example da
 |---|---|---|---|---|---|---|
 | ID | data | data | data | data | data | data |
 
-###Performance
+### Performance
 
 Using the included simulation utilities we can compare the preformance of PIRS to more frequently used standard deviation (SD) based metrics.  To generate a set of simulations, rank by both PIRS and SD and compare precision recall curves, we can run:
 
