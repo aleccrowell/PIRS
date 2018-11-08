@@ -25,10 +25,13 @@ Example Usage
 -------------
 
 ```python
-from PIRS import rank
+from PIRS import simulations, rank
+
+simulation = simulations.simulate()
+simulation.write_output(path_to_data)
 
 data = rank.ranker(path_to_data)
-sorted_data = data.pirs_sort()
+sorted_data = data.pirs_sort(pat_to_outputh)
 ```
 
 ### A Note on Data Formatting
