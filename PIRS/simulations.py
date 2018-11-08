@@ -105,7 +105,7 @@ class simulate:
         
         self.sim = np.array(self.sim)
 
-    def write_output(self, out_name='simulated_data'):
+    def write_output(self, out_name='simulated_data_with_noise.txt'):
         """
 
         out_name : str
@@ -117,7 +117,7 @@ class simulate:
         self.out_name = str(out_name)
         self.simndf = pd.DataFrame(self.sim, columns=self.cols)
         self.simndf.index.names = ['#']
-        self.simndf.to_csv(out_name+'_with_noise.txt', sep='\t')
+        self.simndf.to_csv(out_name, sep='\t')
 
         pd.DataFrame(self.const, columns=['Const'], index=self.simndf.index).to_csv(out_name+'_true_classes.txt', sep='\t')
 
