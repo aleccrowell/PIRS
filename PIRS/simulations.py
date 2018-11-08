@@ -52,7 +52,7 @@ class simulate:
 
     """
 
-    def __init__(self, tpoints=24, nrows=1000, nreps=3, tpoint_space=2, pcirc=.4, plin=.4, phase_prop=.5, phase_noise=.05, amp_noise=.35,  rseed=None):
+    def __init__(self, tpoints=24, nrows=1000, nreps=3, tpoint_space=2, pcirc=.4, plin=.4, phase_prop=.5, phase_noise=.05, amp_noise=.35,  rseed=0):
         """
         Simulates circadian, linear and constitutive data and saves as a properly formatted example .csv file.
 
@@ -165,8 +165,8 @@ class analyze:
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.title('Precision Recall Comparison')
-        plt.legend(loc="upper right")
-        plt.savefig('PR.pdf')
+        plt.legend(loc="center right")
+        plt.savefig('PR.png')
         plt.close()
 
 

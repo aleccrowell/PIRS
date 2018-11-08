@@ -1,0 +1,18 @@
+from PIRS import simulations
+from PIRS import rank
+
+simulation = simulations.simulate(phase_noise=.05, amp_noise=.5)
+simulation.write_output()
+
+
+data = rank.ranker("simulated_data_with_noise.txt")
+sorted_data = data.pirs_sort("pirs_scores.txt")
+
+old_data = rank.rsd_ranker("simulated_data_with_noise.txt")
+old_sorted_data = old_data.rsd_sort("rsd_scores.txt")
+
+analysis = simulations.analyze('simulated_data_true_classes.txt')
+analysis.add_data('pirs_scores.txt','PIRS')
+analysis.add_data('rsd_scores.txt','SD/RSD')
+analysis.generate_pr_curve()
+
