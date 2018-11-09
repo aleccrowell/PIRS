@@ -142,6 +142,8 @@ TO DO
 
 * Add API reference on readthedocs.
 
+* Add built in quantile normalization for ease of use.
+
 ----
 Built With
 ----
