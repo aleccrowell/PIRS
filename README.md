@@ -52,6 +52,8 @@ be expected to have wide prediction intervals which are far from the mean across
 
 ![ImageRelative](data/diagram.png "diagram")
 
+Circles indicate data points, dashed horizontal lines indicate mean of all data, solid lines show prediction intervals and arrows show the difference between prediction interval and mean.
+
 After calculating the prediction intervals PIRS simply considers the sum of squared errors between the upper and lower bounds of the interval and the mean expression across all the observed time points.  This value is then scaled 
 relative to the mean expression producing the final score. 
 
