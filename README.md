@@ -50,7 +50,7 @@ prediction intervals from linear regressions.  A constitutive expression profile
 in expression would have a narrow prediction interval which would be farther from the mean expression at the beginning and end of the time series.  Lastly circadian or other dynamic expression centered on the mean expression would 
 be expected to have wide prediction intervals which are far from the mean across the whole time series.  Each of these cases is pictured below:
 
-![ImageRelative](data/diagram.pdf "diagram")
+![ImageRelative](data/diagram.png "diagram")
 
 After calculating the prediction intervals PIRS simply considers the sum of squared errors between the upper and lower bounds of the interval and the mean expression across all the observed time points.  This value is then scaled 
 relative to the mean expression producing the final score. 
