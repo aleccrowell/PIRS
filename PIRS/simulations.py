@@ -148,6 +148,7 @@ class analyze:
 
     def generate_pr_curve(self):
         self.curves = pd.DataFrame(columns=['precision','recall','method'])
+        colors = ["light grey", "black"]
         for rep, res in self.merged.groupby('rep'):
             for name, group in res.groupby('method'):
                 pr = pd.merge(self.true_classes[self.true_classes['rep']==rep], group, right_index=True, left_index=True, how='inner')
@@ -158,15 +159,18 @@ class analyze:
                 temp['method'] = name
                 temp['rep'] = rep
                 self.curves = pd.concat([self.curves,temp])
-        sns.lineplot(x='recall', y='precision', hue='method', units='rep', estimator=None, data=self.curves)
+        ax = sns.lineplot(x='recall', y='precision', hue='method', units='rep', palette=sns.xkcd_palette(colors), estimator=None, data=self.curves)
+        ax.set_aspect(aspect=0.5)
         plt.plot([0, 1], [np.mean(self.true_classes['Const']), np.mean(self.true_classes['Const'])], color='r', linestyle=':')
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
+        plt.setp(ax.lines, linewidth=0.5)
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.title('Precision Recall Comparison')
         plt.legend(loc="center right")
-        plt.savefig('PR.png')
+        sns.despine(offset=10, trim=True)
+        plt.savefig('PR.pdf')
         plt.close()
 
 

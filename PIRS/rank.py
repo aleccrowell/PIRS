@@ -87,7 +87,7 @@ class ranker:
                 to_remove.append(index)
         self.data = self.data[~self.data.index.isin(to_remove)]
 
-    def calculate_scores(self, alpha=0.05):
+    def calculate_scores(self, alpha=0.5):
         """
         Calculates prediction intervals and generates ranking scores.
 
@@ -112,10 +112,9 @@ class ranker:
             rsq = np.sum((regr.predict(np.array(self.tpoints)[:, np.newaxis]) - np.array(self.data.iloc[index])) ** 2)
             regr_error = math.sqrt(rsq/(dof-2))
             xsq = np.sum((np.array(self.tpoints) - np.mean(np.array(self.tpoints))) ** 2)
-            pred = []
-            for x in np.array(self.tpoints):
-                pred.append(regr.predict([[x]]) + scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(self.tpoints))**2)/xsq)))
-                pred.append(regr.predict([[x]]) - scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*math.sqrt(1+1/dof+(((x-np.mean(self.tpoints))**2)/xsq)))
+            upper = regr.predict(np.arange(min(self.tpoints), max(self.tpoints), 0.1)[:, np.newaxis]) + scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*np.sqrt(1+1/dof+(((np.arange(min(self.tpoints), max(self.tpoints), 0.1)-np.mean(self.tpoints))**2)/xsq))
+            lower = regr.predict(np.arange(min(self.tpoints), max(self.tpoints), 0.1)[:, np.newaxis]) - scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*np.sqrt(1+1/dof+(((np.arange(min(self.tpoints), max(self.tpoints), 0.1)-np.mean(self.tpoints))**2)/xsq))
+            pred = upper + lower
             error = np.sum([(i - np.mean(np.array(self.data.iloc[index]))) ** 2 for i in pred])/(np.mean(np.array(self.data.iloc[index]))**2)
             es[index] = np.mean(error)
         self.errors = pd.DataFrame.from_dict(es, orient='index')
