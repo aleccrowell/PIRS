@@ -99,13 +99,12 @@ class simulate:
                     phases.append('nan')
                     temp = []
                     for j in range(self.nreps):
-                        temp.append((1/(self.tpoints*self.tpoint_space))*np.arange(0, (self.tpoints*self.tpoint_space),
-                                              self.tpoint_space)+np.random.normal(0, self.amp_noise, self.tpoints)-.5)
+                        temp.append((2/(self.tpoints*self.tpoint_space))*np.arange(0, (self.tpoints*self.tpoint_space),
+                                              self.tpoint_space)+np.random.normal(0, self.amp_noise, self.tpoints))
                     self.sim.append([item for sublist in zip(*temp) for item in sublist])
             else:
                 phases.append('nan')
-                self.sim.append(np.random.normal(
-                    0, self.amp_noise, (self.tpoints*self.nreps)))
+                self.sim.append(np.random.normal(0, self.amp_noise, (self.tpoints*self.nreps)))
         
         self.sim = np.array(self.sim)
 
@@ -125,6 +124,54 @@ class simulate:
 
         pd.DataFrame(self.const, columns=['Const'], index=self.simndf.index).to_csv(out_name[:-4]+'_true_classes.txt', sep='\t')
 
+    def write_genorm(self, out_name='simulated_data_with_noise_bc.txt'):
+        """
+
+        out_name : str
+
+        output file stem
+
+        """
+
+        self.out_name = str(out_name)
+        self.simbcdf = pd.DataFrame(self.sim, columns=self.cols)
+        self.simbcdf.index.names = ['#']
+        self.simbcdf.reset_index(inplace=True)
+        self.simbcdf = pd.melt(self.simbcdf, id_vars=['#'])
+        self.simbcdf.columns = ['Detector','Sample','Cq']
+        self.simbcdf = self.simbcdf[['Sample','Detector','Cq']]
+        self.simbcdf.Sample = self.simbcdf.Sample.apply(lambda x: x.split('_')[0])
+        self.simbcdf.Detector = self.simbcdf.Detector.astype(str)
+        self.simbcdf.Sample = self.simbcdf.Sample.astype(str)
+        self.simbcdf.Sample = self.simbcdf.Sample.apply(lambda x: 'timepoint_' + x)
+        self.simbcdf.Detector = self.simbcdf.Detector.apply(lambda x: 'gene_' + x)
+        self.simbcdf.Cq = (self.simbcdf.Cq - np.min(self.simbcdf.Cq))/(np.max(self.simbcdf.Cq) - np.min(self.simbcdf.Cq))
+        self.simbcdf.to_csv(out_name, sep=' ', index=False)
+
+    def write_normfinder(self, out_name='simulated_data_with_noise_bc.txt'):
+        """
+
+        out_name : str
+
+        output file stem
+
+        """
+
+        self.out_name = str(out_name)
+        self.simbcdf = pd.DataFrame(self.sim, columns=self.cols)
+        self.simbcdf.index.names = ['#']
+        self.simbcdf.reset_index(inplace=True)
+        self.simbcdf = pd.melt(self.simbcdf, id_vars=['#'])
+        self.simbcdf.columns = ['Detector', 'Sample', 'Cq']
+        self.simbcdf = self.simbcdf[['Sample', 'Detector', 'Cq']]
+        self.simbcdf.Detector = self.simbcdf.Detector.astype(str)
+        self.simbcdf.Sample = self.simbcdf.Sample.astype(str)
+        self.simbcdf.Sample = self.simbcdf.Sample.apply(
+            lambda x: 'timepoint_' + x)
+        self.simbcdf.Detector = self.simbcdf.Detector.apply(
+            lambda x: 'gene_' + x)
+        self.simbcdf.Cq = (self.simbcdf.Cq - np.min(self.simbcdf.Cq))/(np.max(self.simbcdf.Cq) - np.min(self.simbcdf.Cq))
+        self.simbcdf.to_csv(out_name, sep=' ', index=False)
 
 class analyze:
     def __init__(self):
@@ -132,12 +179,12 @@ class analyze:
         self.merged = pd.DataFrame()
 
     def add_classes(self, filename_classes, rep=0):
-        tc = pd.read_csv(filename_classes, index_col=0, sep='\t')
+        tc = pd.read_csv(filename_classes, sep='\t')
         tc['rep'] = rep
         self.true_classes = pd.concat([self.true_classes,tc])
 
     def add_data(self, filename_pirs, tag, rep=0):
-        ranks = pd.read_csv(filename_pirs, index_col=0, sep='\t')
+        ranks = pd.read_csv(filename_pirs, sep='\t')
         ranks['method'] =  tag
         ranks['rep'] = rep
         ranks['score'].fillna(ranks['score'].max(), inplace=True)
@@ -148,17 +195,20 @@ class analyze:
 
     def generate_pr_curve(self):
         self.curves = pd.DataFrame(columns=['precision','recall','method'])
-        colors = ["light grey", "black"]
-        for rep, res in self.merged.groupby('rep'):
-            for name, group in res.groupby('method'):
-                pr = pd.merge(self.true_classes[self.true_classes['rep']==rep], group, right_index=True, left_index=True, how='inner')
+        #colors = ["light grey", "black"]
+        colors = ["windows blue","amber","light grey", "black"]
+        #need to pivot out and fillna with max to replace missing values
+        self.merged = self.merged.pivot_table(index=['rep', 'method'], columns='#', values='score').fillna(self.merged.score.max()).reset_index().melt(id_vars=['rep', 'method'], value_name='score')
+        for rep in self.merged.rep.unique():
+            for method in self.merged.method.unique():
+                pr = pd.merge(self.true_classes[self.true_classes['rep'] == rep], self.merged[(self.merged.rep == rep) & (self.merged.method == method)], on=['#', 'rep'])
                 precision, recall, _ = precision_recall_curve(pr['Const'].values, 1/pr['score'].values, pos_label=1)
                 temp = pd.DataFrame()
                 temp['precision'] = precision
                 temp['recall'] = recall
-                temp['method'] = name
+                temp['method'] = method
                 temp['rep'] = rep
-                self.curves = pd.concat([self.curves,temp])
+                self.curves = pd.concat([self.curves, temp],sort=False)
         ax = sns.lineplot(x='recall', y='precision', hue='method', units='rep', palette=sns.xkcd_palette(colors), estimator=None, data=self.curves)
         ax.set_aspect(aspect=0.5)
         plt.plot([0, 1], [np.mean(self.true_classes['Const']), np.mean(self.true_classes['Const'])], color='r', linestyle=':')
@@ -168,9 +218,12 @@ class analyze:
         plt.xlabel('Recall')
         plt.ylabel('Precision')
         plt.title('Precision Recall Comparison')
-        plt.legend(loc="center right")
+        #plt.legend(loc="center right")
+        leg = plt.legend(loc='upper center', bbox_to_anchor=(1.2, 0.8), shadow=True)
+        #leg._legend_box.align = "right"
         sns.despine(offset=10, trim=True)
-        plt.savefig('PR.pdf')
+        plt.tight_layout()
+        plt.savefig('PR.pdf',dpi=25)
         plt.close()
 
 
