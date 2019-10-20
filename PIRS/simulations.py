@@ -7,6 +7,7 @@ from sklearn.metrics import precision_recall_curve, average_precision_score
 import matplotlib.pyplot as plt
 import random
 import seaborn as sns
+from sklearn.preprocessing import scale
 
 ##Simulating single expression level, would have to equalize distribution of mean expressins between classes if simulating multiple expression levels
 
@@ -93,20 +94,22 @@ class simulate:
                     p = np.random.binomial(1, self.phase_prop)
                     phases.append(p)
                     for j in range(self.nreps):
-                        temp.append(np.sin(base+np.random.normal(0, self.phase_noise, 1) + np.pi*p)+np.random.normal(0, self.amp_noise, self.tpoints))
+                        temp.append(np.sin(base+np.random.normal(0, self.phase_noise, 1) + np.pi*p)+np.random.normal(1, self.amp_noise, self.tpoints))
                     self.sim.append([item for sublist in zip(*temp) for item in sublist])
                 else:
                     phases.append('nan')
                     temp = []
                     for j in range(self.nreps):
-                        temp.append((2/(self.tpoints*self.tpoint_space))*np.arange(0, (self.tpoints*self.tpoint_space),
-                                              self.tpoint_space)+np.random.normal(0, self.amp_noise, self.tpoints))
+                        temp.append(2*np.arange(0, (self.tpoints*self.tpoint_space), self.tpoint_space)/(self.tpoints*self.tpoint_space)+np.random.normal(1, self.amp_noise, self.tpoints))
                     self.sim.append([item for sublist in zip(*temp) for item in sublist])
             else:
                 phases.append('nan')
-                self.sim.append(np.random.normal(0, self.amp_noise, (self.tpoints*self.nreps)))
+                temp = []
+                for j in range(self.nreps):
+                    temp.append(np.random.normal(1, self.amp_noise, self.tpoints))
+                self.sim.append([item for sublist in zip(*temp) for item in sublist])
         
-        self.sim = np.array(self.sim)
+        self.sim = scale(np.array(self.sim), axis=1, with_mean=False)
 
     def write_output(self, out_name='simulated_data_with_noise.txt'):
         """

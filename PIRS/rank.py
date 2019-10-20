@@ -193,7 +193,7 @@ class rsd_ranker:
             Relative Standard Deviation for each expression profile.
 
         """
-        rsd = (1 + (1/(4*len(self.data)))) * np.std(self.data.values, axis=1) / np.abs(np.mean(self.data.values, axis=1))
+        rsd = (1 + (1/(4*len(self.data)))) * np.std((self.data.values), axis=1) / np.abs(np.mean((self.data.values), axis=1))
         self.rsd = pd.DataFrame(rsd, index=self.data.index) 
         self.rsd.columns = ['score']
         self.rsd.sort_values('score', inplace=True)
