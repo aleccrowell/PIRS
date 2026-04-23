@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 
 
-def make_ranker_tsv(tmp_path, n_timepoints=4, n_reps=3, n_genes=8, ct_prefix=True):
+def make_ranker_tsv(tmp_path, n_timepoints=4, n_reps=3, n_genes=8, prefix="ZT"):
     """Write a tab-separated file in the format expected by ranker/rsd_ranker."""
-    prefix = "CT" if ct_prefix else ""
     tpoints = [(i + 1) * 2 for i in range(n_timepoints)]  # 2, 4, 6, 8, ...
     cols = [f"{prefix}{t:02d}_{r}" for t in tpoints for r in range(1, n_reps + 1)]
 
@@ -32,4 +31,4 @@ def tsv_file(tmp_path):
 
 @pytest.fixture
 def tsv_no_ct(tmp_path):
-    return make_ranker_tsv(tmp_path, ct_prefix=False)
+    return make_ranker_tsv(tmp_path, prefix="")

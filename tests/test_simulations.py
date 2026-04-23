@@ -22,10 +22,10 @@ class TestSimulateInit:
 
     def test_column_name_format(self):
         sim = simulate(tpoints=4, nrows=10, nreps=2, tpoint_space=2)
-        # First column should be "02_1"
-        assert sim.cols[0] == "02_1"
-        assert sim.cols[1] == "02_2"
-        assert sim.cols[2] == "04_1"
+        # First column should be "ZT02_1"
+        assert sim.cols[0] == "ZT02_1"
+        assert sim.cols[1] == "ZT02_2"
+        assert sim.cols[2] == "ZT04_1"
 
     def test_const_array_length(self):
         sim = simulate(nrows=50)
@@ -54,9 +54,9 @@ class TestSimulateInit:
 
     def test_custom_tpoint_space(self):
         sim = simulate(tpoints=4, nrows=10, nreps=2, tpoint_space=4)
-        # First timepoint = 1 * tpoint_space = 4 → "04_1"
-        assert sim.cols[0] == "04_1"
-        assert sim.cols[2] == "08_1"
+        # First timepoint = 1 * tpoint_space = 4 → "ZT04_1"
+        assert sim.cols[0] == "ZT04_1"
+        assert sim.cols[2] == "ZT08_1"
 
     def test_sim_values_scaled(self):
         # scale(axis=1, with_mean=False) sets std to 1 per row

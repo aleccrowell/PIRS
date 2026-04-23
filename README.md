@@ -58,11 +58,9 @@ After calculating the prediction intervals PIRS simply considers the sum of squa
 relative to the mean expression producing the final score. 
 
 ### A Note on Data Formatting
-PIRS expects input files to be formatted as tab seperated.  The first column should indicate the transcript or protein identifier.  The header should start with '#' and the rest of the header should be of the form 02_1 for data with
-the first number indicating the timepoint and the second the replicate.  Single digit timepoints should include the leading zero for 
-formatting. Missing values should be indicated by the string 'NULL'.  Example data file:
+PIRS expects input files to be formatted as tab separated.  The first column should indicate the transcript or protein identifier and its header should be `#`.  Time series columns should use the format `ZT{HH}_{rep}`, where `HH` is the zero-padded hour and `rep` is the replicate number (e.g. `ZT00_1`, `ZT02_1`).  This format is shared with [LIMBR](https://github.com/aleccrowell/LIMBR) and [BooteJTK](https://github.com/aleccrowell/BooteJTK-c), so output from those tools can be passed directly to PIRS without reformatting.  The legacy bare-numeric format (e.g. `02_1`) and the `CT`-prefixed variant (e.g. `CT02_1`) are also accepted for backwards compatibility.  Single digit timepoints should include the leading zero for formatting. Missing values should be indicated by the string 'NULL'.  Example data file:
 
-| # | 00_1 | 00_2 | 00_3 | 02_1 | 02_2 | 02_3 |
+| # | ZT00_1 | ZT00_2 | ZT00_3 | ZT02_1 | ZT02_2 | ZT02_3 |
 |---|---|---|---|---|---|---|
 | ID | data | data | data | data | data | data |
 
