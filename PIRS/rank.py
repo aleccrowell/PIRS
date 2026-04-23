@@ -1,10 +1,8 @@
 import pandas as pd
 import numpy as np
-from itertools import *
 from scipy import stats
 from sklearn import linear_model
 import math
-import scipy
 from tqdm import tqdm
 
 class ranker:
@@ -96,7 +94,7 @@ class ranker:
         Parameters
         ----------
         alpha : float
-        Significance threshold for anova filtering.
+            Significance level for prediction interval calculation.
 
         Attributes
         ----------
@@ -112,10 +110,12 @@ class ranker:
             rsq = np.sum((regr.predict(np.array(self.tpoints)[:, np.newaxis]) - np.array(self.data.iloc[index])) ** 2)
             regr_error = math.sqrt(rsq/(dof-2))
             xsq = np.sum((np.array(self.tpoints) - np.mean(np.array(self.tpoints))) ** 2)
-            upper = regr.predict(np.arange(min(self.tpoints), max(self.tpoints), 0.1)[:, np.newaxis]) + scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*np.sqrt(1+1/dof+(((np.arange(min(self.tpoints), max(self.tpoints), 0.1)-np.mean(self.tpoints))**2)/xsq))
-            lower = regr.predict(np.arange(min(self.tpoints), max(self.tpoints), 0.1)[:, np.newaxis]) - scipy.stats.t.ppf(1.0-alpha/2., dof) * regr_error*np.sqrt(1+1/dof+(((np.arange(min(self.tpoints), max(self.tpoints), 0.1)-np.mean(self.tpoints))**2)/xsq))
+            upper = regr.predict(np.arange(min(self.tpoints), max(self.tpoints), 0.1)[:, np.newaxis]) + stats.t.ppf(1.0-alpha/2., dof) * regr_error*np.sqrt(1+1/dof+(((np.arange(min(self.tpoints), max(self.tpoints), 0.1)-np.mean(self.tpoints))**2)/xsq))
+            lower = regr.predict(np.arange(min(self.tpoints), max(self.tpoints), 0.1)[:, np.newaxis]) - stats.t.ppf(1.0-alpha/2., dof) * regr_error*np.sqrt(1+1/dof+(((np.arange(min(self.tpoints), max(self.tpoints), 0.1)-np.mean(self.tpoints))**2)/xsq))
             pred = upper + lower
-            error = np.sum([(i - np.mean(np.array(self.data.iloc[index]))) ** 2 for i in pred])/(np.mean(np.array(self.data.iloc[index]))**2)
+            mean_expr = np.mean(np.array(self.data.iloc[index]))
+            denom = mean_expr ** 2 if mean_expr != 0 else 1.0
+            error = np.sum([(i - mean_expr) ** 2 for i in pred]) / denom
             es[index] = np.mean(error)
         self.errors = pd.DataFrame.from_dict(es, orient='index')
         self.errors.columns = ['score']

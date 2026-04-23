@@ -1,13 +1,9 @@
 import numpy as np
 import pandas as pd
-import pickle
-import string
 from sklearn.preprocessing import scale
 from sklearn.metrics import precision_recall_curve, average_precision_score
 import matplotlib.pyplot as plt
-import random
 import seaborn as sns
-from sklearn.preprocessing import scale
 
 ##Simulating single expression level, would have to equalize distribution of mean expressins between classes if simulating multiple expression levels
 
@@ -190,7 +186,7 @@ class analyze:
         ranks = pd.read_csv(filename_pirs, sep='\t')
         ranks['method'] =  tag
         ranks['rep'] = rep
-        ranks['score'].fillna(ranks['score'].max(), inplace=True)
+        ranks['score'] = ranks['score'].fillna(ranks['score'].max())
         if self.merged.empty:
             self.merged = ranks
         else:
@@ -229,10 +225,3 @@ class analyze:
         plt.savefig('PR.pdf',dpi=25)
         plt.close()
 
-
-    def calculate_auc(self):
-        out = {}
-        for j in self.tags.keys():
-            fpr, tpr, thresholds = pr_curve(self.merged[self.tags[j]]['Const'].values, (self.merged[self.tags[j]]['score'].values), pos_label=1)
-            out[j] = auc(fpr, tpr)
-        self.pr_auc = out
