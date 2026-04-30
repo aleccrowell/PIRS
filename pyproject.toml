@@ -13,7 +13,7 @@ dependencies = [
     "scipy>=1.7",
     "scikit-learn>=0.24",
     "tqdm>=4.60",
-    "matplotlib>=3.4",
+    "matplotlib>=3.10.9",
     "seaborn>=0.11",
 ]
 
